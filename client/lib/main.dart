@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() {
@@ -148,6 +149,28 @@ class _TaskPageState extends State<TaskPage> {
     );
   }
 
+  Future<void> _sendTaskToBackend(Task task) async {
+    final url = Uri.parse(
+        'https://example.com/api/tasks'); // Replace with your actual endpoint
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'title': task.title,
+        'description': task.description,
+        'status': task.status,
+        'deadline': task.deadline?.toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      debugPrint('Task saved successfully');
+    } else {
+      debugPrint('Failed to save task: ${response.statusCode}');
+    }
+  }
+
   void _showTaskDialog({int? index}) {
     final TextEditingController titleController = TextEditingController();
     final TextEditingController descriptionController = TextEditingController();
@@ -216,34 +239,35 @@ class _TaskPageState extends State<TaskPage> {
               },
               child: Text(selectedDeadline == null
                   ? 'Pick Deadline'
-                  : '${selectedDeadline.toString()}'),
+                  : selectedDeadline.toString()),
             ),
           ],
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               if (titleController.text.isNotEmpty &&
                   descriptionController.text.isNotEmpty) {
+                final newTask = Task(
+                  title: titleController.text,
+                  description: descriptionController.text,
+                  deadline: selectedDeadline,
+                  status: index == null ? 'Ongoing' : _tasks[index].status,
+                );
+
                 setState(() {
                   if (index == null) {
-                    _tasks.add(Task(
-                      title: titleController.text,
-                      description: descriptionController.text,
-                      deadline: selectedDeadline,
-                    ));
+                    _tasks.add(newTask);
                   } else {
-                    _tasks[index] = Task(
-                      title: titleController.text,
-                      description: descriptionController.text,
-                      deadline: selectedDeadline,
-                      status: _tasks[index].status, // Retain existing status
-                    );
+                    _tasks[index] = newTask;
                   }
                 });
-              }
-              if (mounted) {
-                Navigator.pop(context);
+
+                await _sendTaskToBackend(newTask);
+
+                if (mounted) {
+                  Navigator.pop(context);
+                }
               }
             },
             child: const Text('Save'),
@@ -281,19 +305,18 @@ class _TaskPageState extends State<TaskPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(task.description),
-                  if (task.deadline != null)
-                    Text("Deadline: ${task.deadline}"),
+                  if (task.deadline != null) Text("Deadline: ${task.deadline}"),
                 ],
               ),
               trailing: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.refresh), // Changed icon for status update
+                    icon: const Icon(Icons.refresh),
                     onPressed: () => _changeStatus(index),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit), // Edit button now opens task editor
+                    icon: const Icon(Icons.edit),
                     onPressed: () => _showTaskDialog(index: index),
                   ),
                   IconButton(
