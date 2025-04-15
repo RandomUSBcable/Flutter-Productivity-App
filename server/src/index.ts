@@ -2,7 +2,9 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import { loginHandler, registerHandler } from "./controllers/authConroller";
-import getTasksHandler from "./controllers/tasksController";
+import tasksRouter from "./controllers/tasksController";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 
 // Initialize Express and Prisma
 const app = express();
@@ -35,7 +37,7 @@ app.get("/users", async (req: Request, res: Response) => {
 //handlers
 app.post("/login", loginHandler);
 app.post("/register", registerHandler);
-app.use("/tasks", getTasksHandler);
+app.use("/tasks", tasksRouter);
 
 //
 //
