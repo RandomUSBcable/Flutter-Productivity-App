@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tryBuild": "COPY prisma ./prisma/ && node src/index.ts",
+    "tryBuild": "COPY prisma ./prisma/ && npm install",
+    "tryStart": "node src/index.ts",
     "dev": "nodemon src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
