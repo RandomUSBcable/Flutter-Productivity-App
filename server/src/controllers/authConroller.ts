@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import * as bcrypt from "bcryptjs";
+import * as jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -94,12 +94,10 @@ export const registerHandler = async (
       { expiresIn: "1h" }
     );
 
-    res
-      .status(201)
-      .json({
-        token,
-        user: { id: newUser.id, email: newUser.email, role: newUser.role },
-      });
+    res.status(201).json({
+      token,
+      user: { id: newUser.id, email: newUser.email, role: newUser.role },
+    });
   } catch (error) {
     console.error("Registration error:", error);
     next(error);

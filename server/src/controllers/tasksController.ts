@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
 // Import Prisma namespace along with PrismaClient and Role
 import { PrismaClient, Role, Prisma } from "@prisma/client"; // Make sure Prisma is imported
 const prisma = new PrismaClient();
